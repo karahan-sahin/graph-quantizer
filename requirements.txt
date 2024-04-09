@@ -1,0 +1,5 @@
+torch
+opencv-python
+# medipipe
+vector-quantize-pytorch
+torch_geometric
