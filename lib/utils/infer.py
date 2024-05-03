@@ -1,10 +1,8 @@
 import os
 import cv2
-import numpy as np
-import pandas as pd
-from ..config import *
-
 import mediapipe as mp
+import numpy as np
+from ..config import *
 
 def get_pose_estimation( video_path : str, with_info : bool = False) -> dict:
     """
@@ -229,65 +227,3 @@ def get_pose_estimation( video_path : str, with_info : bool = False) -> dict:
         return landmarks, info
     else:
         return landmarks, None
-    
-
-def get_pose_array(SAMPLE_POSE):
-    """Converts the pose data into a numpy array
-    """
-
-    POSE_RAW = pd.DataFrame(SAMPLE_POSE['pose'])
-    RIGHT_HAND_RAW = pd.DataFrame(SAMPLE_POSE['right'])
-    LEFT_HAND_RAW = pd.DataFrame(SAMPLE_POSE['left'])
-
-    POSE_DF = {}
-
-    for col in POSE_RAW.columns:
-        POSE_DF[ 'POSE_' + col + '_X'] = POSE_RAW[col].apply(lambda x: x[0])
-        POSE_DF[ 'POSE_' + col + '_Y'] = POSE_RAW[col].apply(lambda x: x[1])
-        POSE_DF[ 'POSE_' + col + '_Z'] = POSE_RAW[col].apply(lambda x: x[2])
-        # POSE_DF[col + '_viz'] = POSE_RAW[col].apply(lambda x: x[3])
-
-    for col in RIGHT_HAND_RAW.columns:
-        POSE_DF[ 'RIGHT_' + col + '_X' ] = RIGHT_HAND_RAW[col].apply(lambda x: x[0])
-        POSE_DF[ 'RIGHT_' + col + '_Y' ] = RIGHT_HAND_RAW[col].apply(lambda x: x[1])
-        POSE_DF[ 'RIGHT_' + col + '_Z' ] = RIGHT_HAND_RAW[col].apply(lambda x: x[2])
-        # POSE_DF['RIGHT_' + col + '_viz'] = RIGHT_HAND_RAW[col].apply(lambda x: x[3])
-
-    for col in LEFT_HAND_RAW.columns:
-        POSE_DF[ 'LEFT_' + col + '_X' ] = LEFT_HAND_RAW[col].apply(lambda x: x[0])
-        POSE_DF[ 'LEFT_' + col + '_Y' ] = LEFT_HAND_RAW[col].apply(lambda x: x[1])
-        POSE_DF[ 'LEFT_' + col + '_Z' ] = LEFT_HAND_RAW[col].apply(lambda x: x[2])
-        # POSE_DF['LEFT_' + col + '_viz'] = LEFT_HAND_RAW[col].apply(lambda x: x[3])
-
-    POSE_DF = pd.DataFrame(POSE_DF)
-
-    return POSE_DF
-
-
-def get_matrices(POSE_DF):
-    """Converts the pose data into a numpy array of distance matrices
-    """
-    x_cols = [col for col in POSE_DF.columns if col.endswith('_X')]
-    y_cols = [col for col in POSE_DF.columns if col.endswith('_Y')]
-    z_cols = [col for col in POSE_DF.columns if col.endswith('_Z')]
-
-    frames = []
-    for i in range(1, POSE_DF.shape[0]):
-        x_row = POSE_DF[x_cols].iloc[i].to_numpy()
-        y_row = POSE_DF[y_cols].iloc[i].to_numpy()
-        z_row = POSE_DF[z_cols].iloc[i].to_numpy()
-
-        def get_difference_matrix(row):
-            m, n = np.meshgrid(row, row)
-            out = m-n
-            return out
-
-        x_diff = get_difference_matrix(x_row)
-        y_diff = get_difference_matrix(y_row)
-        z_diff = get_difference_matrix(z_row)
-
-        frame = np.stack([x_diff, y_diff, z_diff], axis=2)
-        frames.append(frame)
-
-    frames = np.stack(frames, axis=0)
-    return frames
