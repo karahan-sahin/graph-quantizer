@@ -105,8 +105,21 @@ class Quantizer(nn.Module):
         
         return data
     
+    def process_pose(self, video_path: str):
 
+        pose_array = pose_array.replace(np.nan, 0)
+        matrices = get_matrices(pose_array)
 
+        # Generate overlapping windows
+        windows = []
+        for i in range(0, len(matrices) - self.num_frames, self.stride):
+            window = matrices[i:i+self.num_frames]
+            windows.append(window)
+        
+        # Convert to tensor
+        data = torch.tensor(windows).float()
+        
+        return data
 
 
 
