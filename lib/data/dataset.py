@@ -94,3 +94,4 @@ class PoseDistanceDataset(Dataset):
             'start_idx': start_idx,
             'end_idx': end_idx
         }
+
